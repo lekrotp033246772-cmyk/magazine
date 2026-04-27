@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
-<title>型錄</title>
+<title>立肯隆型錄</title>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/gh/blasten/turn.js@master/turn.js"></script>
@@ -10,16 +10,20 @@
 <style>
 body {
     margin: 0;
-    background: #2b2b2b;
+    background: linear-gradient(135deg,#1e1e1e,#3a3a3a);
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
+    flex-direction: column;
+    font-family: Arial;
 }
 
+/* 書本 */
 #flipbook {
     width: 90vw;
     height: 80vh;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
 }
 
 #flipbook div {
@@ -32,11 +36,42 @@ body {
     height: 100%;
     object-fit: cover;
 }
+
+/* 按鈕區 */
+.contact-group {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.btn {
+    padding: 12px 18px;
+    border-radius: 30px;
+    color: #fff;
+    text-decoration: none;
+    font-size: 14px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+    transition: 0.3s;
+}
+
+.btn:hover {
+    transform: translateY(-3px);
+}
+
+/* 不同按鈕顏色 */
+.phone { background: #27ae60; }
+.email { background: #2980b9; }
+.pdf   { background: #e74c3c; }
+
 </style>
 </head>
 
 <body>
 
+<!-- 翻頁 -->
 <div id="flipbook">
     <div><img src="pages/1.jpg"></div>
     <div><img src="pages/2.jpg"></div>
@@ -48,6 +83,13 @@ body {
     <div><img src="pages/8.jpg"></div>
     <div><img src="pages/9.jpg"></div>
     <div><img src="pages/10.jpg"></div>
+</div>
+
+<!-- 聯絡按鈕 -->
+<div class="contact-group">
+    <a href="tel:03-3246772" class="btn phone">📞 聯絡電話</a>
+    <a href="mailto:lekro.tp.033246772@gmail.com" class="btn email">✉️ Email</a>
+    <a href="catalog.pdf" class="btn pdf" target="_blank">📄 下載型錄</a>
 </div>
 
 <script>
