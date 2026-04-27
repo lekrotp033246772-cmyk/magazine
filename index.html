@@ -2,105 +2,68 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
-<title>立肯隆型錄</title>
+<title>LEKRO 型錄</title>
 
-<link rel="stylesheet" href="css/magazine.css">
-
+<!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/turn.js@4/turn.min.js"></script>
+
+<!-- turn.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/3/turn.min.js"></script>
 
 <style>
 body {
-  margin: 0;
-  background: #2b2b2b;
+    margin: 0;
+    background: #2b2b2b;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
 }
 
 /* 書本 */
 #flipbook {
-  width: 90vw;
-  max-width: 1000px;
-  height: 650px;
-  margin: 60px auto;
+    width: 900px;
+    height: 600px;
 }
 
 /* 每頁 */
 #flipbook div {
-  background: white;
+    width: 100%;
+    height: 100%;
 }
 
+/* 圖片 */
 #flipbook img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-/* 聯絡按鈕 */
-.contact-group {
-  position: fixed;
-  right: 20px;
-  bottom: 30px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.contact-btn {
-  background: rgba(0,0,0,0.8);
-  color: #fff;
-  padding: 12px 18px;
-  cursor: pointer;
-  letter-spacing: 2px;
-  border: 1px solid #fff;
-  font-size: 13px;
-  text-align: center;
-}
-
-.contact-btn:hover {
-  background: #fff;
-  color: #000;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 </style>
 
 </head>
-
 <body>
 
-<div id="flipbook"></div>
-
-<!-- 聯絡按鈕 -->
-<div class="contact-group">
-  <div class="contact-btn" onclick="callPhone()">電話聯絡</div>
-  <div class="contact-btn" onclick="sendEmail()">Email</div>
+<div id="flipbook">
+    <div><img src="pages/1.jpg"></div>
+    <div><img src="pages/2.jpg"></div>
+    <div><img src="pages/3.jpg"></div>
+    <div><img src="pages/4.jpg"></div>
+    <div><img src="pages/5.jpg"></div>
+    <div><img src="pages/6.jpg"></div>
+    <div><img src="pages/7.jpg"></div>
+    <div><img src="pages/8.jpg"></div>
+    <div><img src="pages/9.jpg"></div>
+    <div><img src="pages/10.jpg"></div>
 </div>
 
 <script>
-$(document).ready(function () {
-
-  let totalPages = 10; // 你有10張圖
-
-  for (let i = 1; i <= totalPages; i++) {
-    $('#flipbook').append(
-      '<div><img src="pages/' + i + '.jpg"></div>'
-    );
-  }
-
-  $('#flipbook').turn({
-    width: 1000,
-    height: 650,
-    autoCenter: true
-  });
-
+$(document).ready(function() {
+    $("#flipbook").turn({
+        width: 900,
+        height: 600,
+        autoCenter: true
+    });
 });
-
-// 電話
-function callPhone() {
-  window.location.href = "tel:033246772";
-}
-
-// Email
-function sendEmail() {
-  window.location.href = "mailto:lekro.tp.033246772@gmail.com";
-}
 </script>
 
 </body>
