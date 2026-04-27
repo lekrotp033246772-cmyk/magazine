@@ -11,19 +11,18 @@
 body {
     margin: 0;
     background: #2b2b2b;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    overflow: hidden; /* ⭐ 防止畫面被撐開 */
-    font-family: Arial;
+    overflow: hidden;
 }
 
-/* 書本 */
+/* ⭐ 關鍵：用絕對置中，不用 flex */
 #flipbook {
-    width: 90vw;
-    height: 80vh;
-    max-width: 1000px;
+    width: 1000px;
+    height: 600px;
+
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
 #flipbook div {
@@ -58,10 +57,8 @@ body {
     font-size: 20px;
     color: #fff;
     text-decoration: none;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
 }
 
-/* 顏色 */
 .phone { background: #27ae60; }
 .email { background: #2980b9; }
 .pdf   { background: #e74c3c; }
@@ -71,7 +68,6 @@ body {
 
 <body>
 
-<!-- 翻頁 -->
 <div id="flipbook">
     <div><img src="pages/1.jpg"></div>
     <div><img src="pages/2.jpg"></div>
@@ -85,18 +81,17 @@ body {
     <div><img src="pages/10.jpg"></div>
 </div>
 
-<!-- 聯絡按鈕 -->
 <div class="contact-group">
-    <a href="tel:03-3246772" class="btn phone">📞</a>
-    <a href="mailto:lekro.tp.033246772@gmail.com" class="btn email">✉️</a>
+    <a href="tel:0900000000" class="btn phone">📞</a>
+    <a href="mailto:test@gmail.com" class="btn email">✉️</a>
     <a href="catalog.pdf" class="btn pdf" target="_blank">📄</a>
 </div>
 
 <script>
 $(function(){
     $('#flipbook').turn({
-        width: $('#flipbook').width(),
-        height: $('#flipbook').height(),
+        width: 1000,
+        height: 600,
         autoCenter: true
     });
 });
