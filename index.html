@@ -1,108 +1,516 @@
-<script>
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <meta name="description" content="電子翻頁目錄" />
+  <title>電子翻頁目錄</title>
 
-  let pageFlip;
+  <!-- 翻頁套件 -->
+  <script src="https://cdn.jsdelivr.net/npm/page-flip/dist/js/page-flip.browser.min.js"></script>
 
-  window.addEventListener("load", function () {
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-    // 初始化翻頁
+    html,
+    body {
+      width: 100%;
+      min-height: 100%;
+      font-family: "Noto Sans TC", "Microsoft JhengHei", Arial, sans-serif;
+      background: radial-gradient(circle at center, #f8f3ec 0%, #d8cec2 100%);
+      overflow: hidden;
+      color: #2f2723;
+    }
 
-    pageFlip = new St.PageFlip(
-      document.getElementById("book"),
-      {
+    body {
+      position: relative;
+    }
 
+    .loader {
+      position: fixed;
+      inset: 0;
+      background: #f4eee7;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      flex-direction: column;
+      gap: 14px;
+      transition: opacity 0.4s ease;
+    }
+
+    .loader.hide {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .loader-text {
+      font-size: 16px;
+      letter-spacing: 1px;
+      color: #4a3b34;
+      font-weight: 700;
+    }
+
+    .spinner {
+      width: 42px;
+      height: 42px;
+      border: 4px solid #d8cabe;
+      border-top-color: #4a3b34;
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .top-bar {
+      width: 100%;
+      height: 62px;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(10px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1000;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+      padding: 0 16px;
+    }
+
+    .top-title {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+
+    .book-stage {
+      width: 100vw;
+      height: 100vh;
+      padding: 82px 18px 88px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .book-shell {
+      position: relative;
+      width: min(94vw, 1100px);
+      height: min(78vh, 760px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #book {
+      width: 100%;
+      height: 100%;
+    }
+
+    .page {
+      background: #fff;
+      overflow: hidden;
+      box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.08);
+    }
+
+    .page img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      background: #fff;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    .page-hint {
+      position: fixed;
+      left: 50%;
+      bottom: 74px;
+      transform: translateX(-50%);
+      font-size: 13px;
+      color: rgba(47, 39, 35, 0.72);
+      background: rgba(255, 255, 255, 0.7);
+      padding: 6px 14px;
+      border-radius: 999px;
+      z-index: 800;
+      backdrop-filter: blur(8px);
+      white-space: nowrap;
+    }
+
+    .controls {
+      position: fixed;
+      left: 50%;
+      bottom: 22px;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 1200;
+    }
+
+    .controls button,
+    .fullscreen-btn {
+      border: none;
+      background: #3f312b;
+      color: #fff;
+      padding: 11px 20px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 700;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
+      transition: 0.2s ease;
+    }
+
+    .controls button:hover,
+    .fullscreen-btn:hover {
+      background: #6b5147;
+      transform: translateY(-1px);
+    }
+
+    .page-number {
+      min-width: 86px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 800;
+      color: #3f312b;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 9px 12px;
+      border-radius: 999px;
+      box-shadow: 0 5px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    .floating-buttons {
+      position: fixed;
+      right: 18px;
+      bottom: 110px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      z-index: 1300;
+    }
+
+    .floating-buttons a {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #3f312b;
+      color: #fff;
+      text-decoration: none;
+      font-size: 24px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+      transition: 0.22s ease;
+    }
+
+    .floating-buttons a:hover {
+      background: #6b5147;
+      transform: scale(1.08);
+    }
+
+    .side-click {
+      position: fixed;
+      top: 72px;
+      bottom: 88px;
+      width: 18%;
+      z-index: 700;
+      cursor: pointer;
+    }
+
+    .side-click.left {
+      left: 0;
+    }
+
+    .side-click.right {
+      right: 0;
+    }
+
+    .side-click::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      opacity: 0;
+      transition: 0.2s ease;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: rgba(63, 49, 43, 0.75);
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 24px;
+    }
+
+    .side-click.left::after {
+      content: "‹";
+      left: 18px;
+    }
+
+    .side-click.right::after {
+      content: "›";
+      right: 18px;
+    }
+
+    .side-click:hover::after {
+      opacity: 1;
+    }
+
+    @media (max-width: 768px) {
+      html,
+      body {
+        overflow: hidden;
+      }
+
+      .top-bar {
+        height: 54px;
+      }
+
+      .top-title {
+        font-size: 17px;
+      }
+
+      .book-stage {
+        padding: 68px 8px 92px;
+      }
+
+      .book-shell {
+        width: 100vw;
+        height: 74vh;
+      }
+
+      .controls {
+        gap: 8px;
+        bottom: 18px;
+      }
+
+      .controls button,
+      .fullscreen-btn {
+        font-size: 13px;
+        padding: 10px 13px;
+      }
+
+      .page-number {
+        min-width: 70px;
+        font-size: 13px;
+        padding: 8px 10px;
+      }
+
+      .page-hint {
+        bottom: 70px;
+        font-size: 12px;
+      }
+
+      .floating-buttons {
+        right: 10px;
+        bottom: 112px;
+        gap: 9px;
+      }
+
+      .floating-buttons a {
+        width: 48px;
+        height: 48px;
+        font-size: 20px;
+      }
+
+      .side-click {
+        display: none;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .controls button,
+      .fullscreen-btn {
+        padding: 9px 10px;
+        font-size: 12px;
+      }
+
+      .page-number {
+        font-size: 12px;
+        min-width: 62px;
+      }
+    }
+  </style>
+</head>
+
+<body tabindex="0">
+
+  <div class="loader" id="loader">
+    <div class="spinner"></div>
+    <div class="loader-text">電子目錄載入中</div>
+  </div>
+
+  <header class="top-bar">
+    <div class="top-title">電子翻頁目錄</div>
+  </header>
+
+  <div class="side-click left" id="clickPrev"></div>
+  <div class="side-click right" id="clickNext"></div>
+
+  <main class="book-stage">
+    <section class="book-shell">
+      <div id="book">
+        <div class="page"><img src="https://i.ibb.co/N6N2RCPY/01.png" alt="目錄第1頁"></div>
+        <div class="page"><img src="https://i.ibb.co/0pYNC9GN/02.png" alt="目錄第2頁"></div>
+        <div class="page"><img src="https://i.ibb.co/b5zv13yT/03.png" alt="目錄第3頁"></div>
+        <div class="page"><img src="https://i.ibb.co/7xf82xj1/04.png" alt="目錄第4頁"></div>
+        <div class="page"><img src="https://i.ibb.co/CpCqKZVn/05.png" alt="目錄第5頁"></div>
+        <div class="page"><img src="https://i.ibb.co/N2sfyTFK/06.png" alt="目錄第6頁"></div>
+        <div class="page"><img src="https://i.ibb.co/gLSzBWZf/07.png" alt="目錄第7頁"></div>
+        <div class="page"><img src="https://i.ibb.co/CKzMYkbn/08.png" alt="目錄第8頁"></div>
+        <div class="page"><img src="https://i.ibb.co/TqxBGptg/09.png" alt="目錄第9頁"></div>
+        <div class="page"><img src="https://i.ibb.co/LzV8HgZf/10.png" alt="目錄第10頁"></div>
+      </div>
+    </section>
+  </main>
+
+  <div class="page-hint">
+    電腦可用 ← → 方向鍵｜手機可左右滑動翻頁
+  </div>
+
+  <div class="controls">
+    <button id="prevBtn">← 上一頁</button>
+    <div class="page-number" id="pageNumber">1 / 10</div>
+    <button id="nextBtn">下一頁 →</button>
+    <button class="fullscreen-btn" id="fullscreenBtn">全螢幕</button>
+  </div>
+
+  <div class="floating-buttons">
+    <a href="tel:033246772" title="一鍵撥打電話" aria-label="一鍵撥打電話">☎</a>
+    <a href="https://www.google.com/maps/search/?api=1&query=桃園市大園區中正東路341號" target="_blank" title="一鍵導航" aria-label="一鍵導航">📍</a>
+    <a href="mailto:lekro.tp.033246772@gmail.com" title="一鍵寄信" aria-label="一鍵寄信">✉</a>
+  </div>
+
+  <script>
+    let pageFlip;
+    const totalPages = 10;
+
+    function updatePageNumber() {
+      const currentIndex = pageFlip.getCurrentPageIndex();
+      document.getElementById("pageNumber").textContent = `${currentIndex + 1} / ${totalPages}`;
+    }
+
+    function goPrev() {
+      if (pageFlip) {
+        pageFlip.flipPrev();
+        setTimeout(updatePageNumber, 300);
+      }
+    }
+
+    function goNext() {
+      if (pageFlip) {
+        pageFlip.flipNext();
+        setTimeout(updatePageNumber, 300);
+      }
+    }
+
+    function enterFullscreen() {
+      const element = document.documentElement;
+
+      if (!document.fullscreenElement) {
+        if (element.requestFullscreen) {
+          element.requestFullscreen();
+        }
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+    }
+
+    window.addEventListener("load", function () {
+      const book = document.getElementById("book");
+      const pages = document.querySelectorAll(".page");
+
+      pageFlip = new St.PageFlip(book, {
         width: 450,
         height: 650,
-
         size: "stretch",
-
         minWidth: 315,
-        maxWidth: 1000,
-
+        maxWidth: 1100,
         minHeight: 420,
-        maxHeight: 1350,
-
-        maxShadowOpacity: 0.5,
-
+        maxHeight: 1500,
+        maxShadowOpacity: 0.55,
         showCover: true,
-
         mobileScrollSupport: true,
-
-        flippingTime: 900,
-
         usePortrait: true,
+        flippingTime: 900,
+        autoSize: true,
+        drawShadow: true,
+        startPage: 0
+      });
 
-        autoSize: true
+      pageFlip.loadFromHTML(pages);
 
-      }
-    );
+      pageFlip.on("flip", function () {
+        updatePageNumber();
+      });
 
-    // 載入頁面
+      document.getElementById("prevBtn").addEventListener("click", function (e) {
+        e.stopPropagation();
+        goPrev();
+      });
 
-    pageFlip.loadFromHTML(
-      document.querySelectorAll(".page")
-    );
+      document.getElementById("nextBtn").addEventListener("click", function (e) {
+        e.stopPropagation();
+        goNext();
+      });
 
-    // 自動聚焦頁面
+      document.getElementById("clickPrev").addEventListener("click", function () {
+        goPrev();
+      });
 
-    document.body.setAttribute("tabindex", "0");
-    document.body.focus();
+      document.getElementById("clickNext").addEventListener("click", function () {
+        goNext();
+      });
 
-    // 鍵盤方向鍵翻頁
+      document.getElementById("fullscreenBtn").addEventListener("click", function (e) {
+        e.stopPropagation();
+        enterFullscreen();
+      });
 
-    window.addEventListener("keydown", function (e) {
+      window.addEventListener("keydown", function (e) {
+        if (e.key === "ArrowRight" || e.key === "PageDown") {
+          e.preventDefault();
+          goNext();
+        }
 
-      // 下一頁
+        if (e.key === "ArrowLeft" || e.key === "PageUp") {
+          e.preventDefault();
+          goPrev();
+        }
+      });
 
-      if (
-        e.key === "ArrowRight" ||
-        e.key === "PageDown"
-      ) {
+      document.addEventListener("click", function () {
+        document.body.focus();
+      });
 
-        e.preventDefault();
+      document.body.focus();
 
-        pageFlip.flipNext();
+      updatePageNumber();
 
-      }
-
-      // 上一頁
-
-      if (
-        e.key === "ArrowLeft" ||
-        e.key === "PageUp"
-      ) {
-
-        e.preventDefault();
-
-        pageFlip.flipPrev();
-
-      }
-
+      setTimeout(function () {
+        document.getElementById("loader").classList.add("hide");
+      }, 700);
     });
 
-    // 點擊左右區域翻頁
-
-    document.addEventListener("click", function(e){
-
-      const screenWidth = window.innerWidth;
-
-      // 點右半邊 下一頁
-
-      if(e.clientX > screenWidth / 2){
-
-        pageFlip.flipNext();
-
-      }
-
-      // 點左半邊 上一頁
-
-      else{
-
-        pageFlip.flipPrev();
-
-      }
-
+    document.addEventListener("fullscreenchange", function () {
+      const btn = document.getElementById("fullscreenBtn");
+      btn.textContent = document.fullscreenElement ? "退出全螢幕" : "全螢幕";
     });
+  </script>
 
-  });
-
-</script>
+</body>
+</html>
